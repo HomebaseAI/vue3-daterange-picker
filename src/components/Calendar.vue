@@ -48,19 +48,25 @@
   </table>
 </template>
 
-<script>
-import dateUtilMixin from './dateUtilMixin'
+<script lang="ts">
+import { PropType } from 'vue';
+import { LocaleOptions } from '../dateUtil.js';
+import DateUtilMixin from './DateUtilMixin.vue';
+import { Classes } from '@/DateRangePicker.vue';
+
+
+type Calendar = Array<Array<Date>>;
 
 export default {
-  mixins: [dateUtilMixin],
   name: 'calendar',
+  mixins: [DateUtilMixin],
   props: {
-    monthDate: Date,
-    localeData: Object,
-    start: Date,
-    end: Date,
-    minDate: Date,
-    maxDate: Date,
+    monthDate: { type: Date, required: true },
+    localeData: { type: Object as PropType<LocaleOptions>, required: true },
+    start: { type: Date, required: true },
+    end: { type: Date, required: true },
+    minDate: { type: Date, required: true },
+    maxDate: { type: Date, required: true },
     showDropdowns: {
       type: Boolean,
       default: false,
@@ -70,28 +76,27 @@ export default {
       default: false,
     },
     dateFormat: {
-      type: Function,
+      type: Function as PropType<(classes: Classes, date: Date) => Classes>,
       default: null
     }
   },
   data () {
-    let currentMonthDate = this.monthDate || this.start || new Date()
+    const currentMonthDate = this.monthDate || this.start || new Date()
     return {
       currentMonthDate,
       year_text: currentMonthDate.getFullYear(),
     }
   },
   methods: {
-    prevMonthClick () {
+    prevMonthClick() {
       this.changeMonthDate(this.$dateUtil.prevMonth(this.currentMonthDate))
     },
-    nextMonthClick () {
+    nextMonthClick() {
       this.changeMonthDate(this.$dateUtil.nextMonth(this.currentMonthDate))
     },
-    changeMonthDate (date, emit = true) {
+    changeMonthDate(date: Date, emit = true) {
       let year_month = this.$dateUtil.yearMonth(this.currentMonthDate)
       this.currentMonthDate = this.$dateUtil.validateDateRange(date, this.minDate, this.maxDate)
-      // console.info(date, this.currentMonthDate)
       if (emit && year_month !== this.$dateUtil.yearMonth(this.currentMonthDate)) {
         this.$emit('change-month', {
           month: this.currentMonthDate.getMonth() + 1,
@@ -100,18 +105,18 @@ export default {
       }
       this.checkYear()
     },
-    dayClass (date) {
-      let dt = new Date(date)
+    dayClass(date: Date) {
+      const dt = new Date(date)
       dt.setHours(0, 0, 0, 0)
-      let start = new Date(this.start)
+      const start = new Date(this.start)
       start.setHours(0, 0, 0, 0)
-      let end = new Date(this.end)
+      const end = new Date(this.end)
       end.setHours(0, 0, 0, 0)
 
-      let dt_min_compare = new Date(dt);
+      const dt_min_compare = new Date(dt);
       dt_min_compare.setHours(23, 59, 59, 999)
 
-      let classes = {
+      const classes = {
         off: date.getMonth() + 1 !== this.month,
         weekend: date.getDay() === 6 || date.getDay() === 0,
         today: dt.setHours(0, 0, 0, 0) == new Date().setHours(0, 0, 0, 0),
@@ -138,13 +143,12 @@ export default {
       return this.locale.monthNames[this.currentMonthDate.getMonth()]
     },
     year: {
-      get () {
-        //return this.currentMonthDate.getFullYear()
+      get() {
         return this.year_text
       },
-      set (value) {
+      set(value: number) {
         this.year_text = value
-        let newDate = this.$dateUtil.validateDateRange(new Date(value, this.month, 1), this.minDate, this.maxDate)
+        const newDate = this.$dateUtil.validateDateRange(new Date(value, this.month, 1), this.minDate, this.maxDate)
         if (this.$dateUtil.isValidDate(newDate)) {
           this.$emit('change-month', {
             month: newDate.getMonth(),
@@ -157,8 +161,8 @@ export default {
       get () {
         return this.currentMonthDate.getMonth() + 1
       },
-      set (value) {
-        let newDate = this.$dateUtil.validateDateRange(new Date(this.year, value - 1, 1), this.minDate, this.maxDate)
+      set (value: number) {
+        const newDate = this.$dateUtil.validateDateRange(new Date(this.year, value - 1, 1), this.minDate, this.maxDate)
 
         this.$emit('change-month', {
           month: newDate.getMonth() + 1,
@@ -166,17 +170,15 @@ export default {
         });
       }
     },
-    calendar () {
-      let month = this.month
-      let year = this.currentMonthDate.getFullYear()
-      let firstDay = new Date(year, month - 1, 1)
-      let lastMonth = this.$dateUtil.prevMonth(firstDay).getMonth() + 1
-      let lastYear = this.$dateUtil.prevMonth(firstDay).getFullYear()
-      let daysInLastMonth = new Date(lastYear, month - 1, 0).getDate()
-
-      let dayOfWeek = firstDay.getDay()
-
-      let calendar = []
+    calendar(): Calendar {
+      const month = this.month
+      const year = this.currentMonthDate.getFullYear()
+      const firstDay = new Date(year, month - 1, 1)
+      const lastMonth = this.$dateUtil.prevMonth(firstDay).getMonth() + 1
+      const lastYear = this.$dateUtil.prevMonth(firstDay).getFullYear()
+      const daysInLastMonth = new Date(lastYear, month - 1, 0).getDate()
+      const dayOfWeek = firstDay.getDay()
+      const calendar: Calendar = []
 
       for (let i = 0; i < 6; i++) {
         calendar[i] = [];
@@ -211,10 +213,10 @@ export default {
     },
     locale () {
       return this.$dateUtil.localeData(this.localeData)
-    }
+    },
   },
   watch: {
-    monthDate (value) {
+    monthDate (value: Date) {
       if (this.currentMonthDate.getTime() !== value.getTime()) {
         this.changeMonthDate(value, false)
       }

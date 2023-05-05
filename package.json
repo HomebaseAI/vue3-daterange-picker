@@ -1,67 +1,53 @@
 {
-  "name": "vue2-daterange-picker",
-  "version": "0.6.7",
-  "description": "Vue2 date range picker based on https://github.com/dangrossman/bootstrap-daterangepicker (no jQuery)",
-  "author": "Nikola Kostadinov <nikolakk@gmail.com>",
-  "main": "dist/vue2-daterange-picker.umd.min.js",
-  "jsnext:main": "dist/vue2-daterange-picker.umd.min.js",
-  "private": false,
-  "license": "MIT",
+  "name": "@homebaseai/vue3-daterange-picker",
+  "version": "1.0.0",
+  "description": "VueJS 3 date picker",
+  "author": "HomebaseAI <https://github.com/homebaseai>",
+  "license": "GPL-3.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Innologica/vue2-daterange-picker"
+    "url": "https://github.com/homebaseai/vue3-date-picker"
   },
-  "files": [
-    "dist",
-    "src"
+  "bugs": "https://github.com/hom/vue3-date-picker/issues",
+  "keywords": [
+    "vuejs",
+    "vuejs3",
+    "vue",
+    "vue3",
+    "component",
+    "date",
+    "range",
+    "picker"
   ],
-  "scripts": {
-    "components:parse": "node ./docs/.scripts/parse.js",
-    "components:watch": "watch \"npm run components:parse\" ./src",
-    "lint": "vue-cli-service lint",
-    "lib": "vue-cli-service build --target lib --name vue2-daterange-picker ./src/index.js",
-    "docs:dev": "concurrently \"npm run components:watch\" \"vuepress dev docs\"",
-    "docs:build": "vuepress build docs",
-    "prepublishOnly": "npm run lib",
-    "unit": "vue-cli-service test:unit"
+  "exports": {
+    "default": "./build/index.mjs",
+    "umd": "./build/index.umd.js",
+    "named": "./build/index.mjs",
+    "require": "./build/index.cjs.js",
+    "style": "./build/style.css"
   },
-  "dependencies": {
-    "vue": "^2.6.10"
+  "main": "./build/index.mjs",
+  "module": "./build/index.mjs",
+  "unpkg": "./build/index.umd.js",
+  "jsdelivr": "./build/index.umd.js",
+  "typings": "./typings/plugin.d.ts",
+  "scripts": {
+    "build": "vite build && vue-tsc --emitDeclarationOnly",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "peerDependencies": {
+    "vue": "^2.0.0 || >=3.0.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.7.4",
-    "@babel/runtime": "^7.7.4",
-    "@vue/cli-plugin-babel": "^4.1.1",
-    "@vue/cli-plugin-eslint": "^4.1.1",
-    "@vue/cli-plugin-unit-mocha": "^4.1.1",
-    "@vue/cli-service": "^4.1.1",
-    "@vue/test-utils": "^1.0.0-beta.30",
-    "@vuedoc/parser": "^1.4.0",
-    "@vuepress/plugin-back-to-top": "^1.2.0",
-    "@vuepress/plugin-google-analytics": "^1.2.0",
-    "acorn": "^7.1.0",
-    "autoprefixer": "^9.7.0",
-    "babel-eslint": "^10.0.3",
-    "babel-jest": "^24.9.0",
-    "babel-loader": "^8.0.6",
-    "babel-preset-vue": "^2.0",
-    "caniuse-lite": "^1.0.30001265",
-    "chai": "^4.1.2",
-    "concurrently": "^4.1.2",
-    "es6-symbol": "^3.1.3",
-    "eslint": "^6.7.2",
-    "eslint-plugin-vue": "^6.0.1",
-    "markdown-it-footnote": "^3.0.2",
-    "mockdate": "^2.0.5",
-    "node-sass": "^4.11.0",
-    "sass-loader": "^10.1.1",
-    "vue-template-compiler": "^2.6.10",
-    "vuepress": "^1.2",
-    "webpack": "^4.41.2"
-  },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not ie <= 8"
-  ]
+    "@types/node": "^18.11.9",
+    "@vitejs/plugin-vue": "^3.2.0",
+    "@vitest/coverage-c8": "^0.25.2",
+    "autoprefixer": "^10.4.14",
+    "sass": "^1.62.1",
+    "typescript": "^4.9.3",
+    "vite": "^3.2.4",
+    "vue": "^3.2.45",
+    "vue-tsc": "^0.29.8"
+  }
 }

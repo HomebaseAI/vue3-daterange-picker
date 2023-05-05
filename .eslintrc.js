@@ -1,17 +1,12 @@
 module.exports = {
-  root: true,
-  env: {
-    node: true
-  },
   'extends': [
-    'plugin:vue/essential',
-    'eslint:recommended'
+    '@antfu'
   ],
-  rules: {
-    'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
-    'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off'
-  },
-  parserOptions: {
-    parser: 'babel-eslint'
-  }
+  ignorePatterns: [
+    'node_modules/',
+    'dist/',
+    'coverage/',
+    'pnpm-lock.yaml',
+    '*.js'
+  ]
 }
