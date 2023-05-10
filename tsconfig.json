@@ -1,15 +1,30 @@
 {
-  "files": [],
+  "extends": "@vue/tsconfig/tsconfig.dom.json",
   "compilerOptions": {
-    "emitDeclarationOnly": true,
+    "target": "esnext",
+    "module": "esnext",
+    "outDir": "build",
     "declaration": true,
+    "useDefineForClassFields": true,
+    "removeComments": false,
+    "moduleResolution": "node",
+    "isolatedModules": true,
+    "declarationDir": "./typings",
+    "strict": true,
+    "preserveConstEnums": true,
+    "jsx": "preserve",
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
   },
-  "references": [
-    {
-      "path": "./tsconfig.node.json"
-    },
-    {
-      "path": "./tsconfig.app.json"
-    }
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.vue"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "public",
+    "typings"
   ]
 }
