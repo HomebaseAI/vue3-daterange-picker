@@ -1,6 +1,6 @@
 {
   "name": "@homebaseai/vue3-daterange-picker",
-  "version": "1.0.0",
+  "version": "1.1.1",
   "description": "VueJS 3 date picker",
   "author": "HomebaseAI <https://github.com/homebaseai>",
   "license": "GPL-3.0",
