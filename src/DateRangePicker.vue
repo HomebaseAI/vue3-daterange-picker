@@ -701,13 +701,11 @@ const DateRangePicker = defineComponent({
       return this.alwaysShowCalendars || this.showCustomRangeCalendars
     },
     startText() {
-      if (!this.start)
-        return ''
+      if (!this.start) return ''
       return this.$dateUtil.format(this.start, this.locale.format)
     },
     endText() {
-      if (!this.end)
-        return ''
+      if (!this.end) return ''
       return this.$dateUtil.format(this.end, this.locale.format)
     },
     rangeText() {
@@ -718,10 +716,10 @@ const DateRangePicker = defineComponent({
       return range;
     },
     min() {
-      return this.minDate; 
+      return this.minDate ?? undefined; 
     },
     max() {
-      return this.maxDate; 
+      return this.maxDate ?? undefined; 
     },
     pickerStyles() {
       return {
@@ -747,19 +745,12 @@ const DateRangePicker = defineComponent({
   watch: {
     minDate() {
       this.selectMonthDate();
-      // let dt = this.$dateUtil.validateDateRange(this.monthDate, this.minDate || new Date(), this.maxDate)
-      // this.changeLeftMonth({year: dt.getFullYear(), month: dt.getMonth() + 1})
     },
     maxDate() {
       this.selectMonthDate();
-      // let dt = this.$dateUtil.validateDateRange(this.nextMonthDate, this.minDate, this.maxDate || new Date())
-      // if (this.singleDatePicker !== false)
-      //   this.changeLeftMonth({year: dt.getFullYear(), month: dt.getMonth() + 1})
-      // else
-      //   this.changeRightMonth({year: dt.getFullYear(), month: dt.getMonth() + 1})
     },
-    'dateRange.startDate'(value) {
-      if (!this.$dateUtil.isValidDate(new Date(value)))
+    'dateRange.startDate'(value?: Date) {
+      if (!this.$dateUtil.isValidDate(value))
         return
 
       this.start = (!!value && !this.isClear && this.$dateUtil.isValidDate(new Date(value))) ? new Date(value) : undefined
@@ -771,8 +762,8 @@ const DateRangePicker = defineComponent({
         this.end = new Date(this.value.endDate ?? 0)
       }
     },
-    'dateRange.endDate'(value) {
-      if (!this.$dateUtil.isValidDate(new Date(value)))
+    'dateRange.endDate'(value?: Date) {
+      if (!this.$dateUtil.isValidDate(value))
         return
 
       this.end = (!!value && !this.isClear) ? new Date(value) : undefined;
@@ -787,7 +778,7 @@ const DateRangePicker = defineComponent({
     open: {
       handler(value) {
         if (document) {
-          this.selectMonthDate() //select initial visible months
+          this.selectMonthDate(); //select initial visible months
 
           this.$nextTick(() => {
             value ? document.body.addEventListener('click', this.clickAway) : document.body.removeEventListener('click', this.clickAway)
@@ -810,8 +801,6 @@ const DateRangePicker = defineComponent({
     }
   }
 })
-
-export type DateRangePickerType = InstanceType<typeof DateRangePicker>;
 
 export * from './dateformat';
 export { default as CalendarTime } from './components/CalendarTime.vue';
