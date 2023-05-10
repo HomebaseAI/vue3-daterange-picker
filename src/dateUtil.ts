@@ -1,4 +1,4 @@
-import { dateFormat, getWeek, DEFAULT_i18n, DateValue } from './dateformat.js';
+import { dateFormat, getWeek, DEFAULT_i18n, type DateValue } from './dateformat.js';
 
 const DEFAULT_LOCALE = {
   direction: 'ltr',
