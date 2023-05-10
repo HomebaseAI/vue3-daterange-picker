@@ -6,7 +6,7 @@ export default defineConfig(() => ({
   plugins: [vue()],
   build: {
     lib: {
-      entry: resolve(__dirname, 'src/plugin.ts'),
+      entry: resolve(__dirname, 'src/DateRangePicker.vue'),
       name: 'vue3-date-picker',
       fileName: 'index',
       formats: ['es', 'cjs', 'umd'],

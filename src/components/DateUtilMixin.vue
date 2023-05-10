@@ -1,6 +1,6 @@
 <script lang="ts">
-import { PropType } from 'vue';
-import nativeUtil, { DateUtil } from '../dateUtil.js';
+import type { PropType } from 'vue';
+import nativeUtil, { type DateUtil } from '../dateUtil.js';
 
 export default {
   inject: {

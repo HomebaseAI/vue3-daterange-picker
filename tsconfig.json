@@ -1,38 +1,36 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
+    "target": "esnext",
+    "module": "esnext",
     "outDir": "build",
     "declaration": true,
-    "target": "esnext",
     "useDefineForClassFields": true,
-    "module": "esnext",
+    "removeComments": false,
     "moduleResolution": "node",
     "isolatedModules": true,
     "declarationDir": "./typings",
     "strict": true,
+    "preserveConstEnums": true,
     "jsx": "preserve",
     "sourceMap": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "lib": [
-      "esnext",
-      "dom"
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
     ],
-    "paths": {
-      "@/*": ["src/*"]
-    }
   },
   "include": [
     "src/**/*.ts",
-    "src/**/*.d.ts",
-    "src/**/*.tsx",
     "src/**/*.vue"
   ],
   "exclude": [
     "node_modules",
     "dist",
-    "public"
+    "public",
+    "typings"
   ],
   "references": [
     { "path": "./tsconfig.node.json" }

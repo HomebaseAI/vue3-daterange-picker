@@ -13,9 +13,9 @@
 </template>
 
 <script lang="ts">
-import { PropType } from 'vue';
+import type { PropType } from 'vue';
+import type { LocaleOptions } from '../dateUtil.js';
 import DateUtilMixin from './DateUtilMixin.vue';
-import { LocaleOptions } from '../dateUtil.js';
 
 
 type Ranges = {

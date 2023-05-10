@@ -1,4 +1,4 @@
-import { dateFormat, getWeek, DEFAULT_i18n } from './dateformat.js';
+import { dateFormat, getWeek, DEFAULT_i18n, DateValue } from './dateformat.js';
 
 const DEFAULT_LOCALE = {
   direction: 'ltr',
@@ -28,9 +28,9 @@ export type LocaleOptions = {
 };
 
 const dateUtil = {
-  isSame: (date1: Date, date2: Date, granularity?: string) => {
-    const dt1 = new Date(date1)
-    const dt2 = new Date(date2)
+  isSame: (date1: DateValue, date2: DateValue, granularity?: string) => {
+    const dt1 = new Date(date1 ?? 0);
+    const dt2 = new Date(date2 ?? 0);
     if (granularity === 'date') {
       dt1.setHours(0, 0, 0, 0);
       dt2.setHours(0, 0, 0, 0);
@@ -43,7 +43,7 @@ const dateUtil = {
   weekNumber: (date: Date) => {
     return getWeek(date)
   },
-  format: (date: Date, mask: string) => {
+  format: (date: DateValue, mask: string) => {
     const formatter = dateFormat();
     return formatter(date, mask);
   },
@@ -59,16 +59,13 @@ const dateUtil = {
     prevMonthDate.setMonth(prevMonthDate.getMonth() - 1)
     return prevMonthDate
   },
-  validateDateRange: (newDate: Date, min: Date, max: Date) => {
-    let max_date = new Date(max);
-    let min_date = new Date(min);
-
-    if (max && newDate.getTime() > max_date.getTime()) {
-      return max_date;
+  validateDateRange: (newDate: Date, min?: Date, max?: Date) => {
+    if (max && newDate.getTime() > max.getTime()) {
+      return max;
     }
 
-    if (min && newDate.getTime() < min_date.getTime()) {
-      return min_date;
+    if (min && newDate.getTime() < min.getTime()) {
+      return min;
     }
 
     return newDate;

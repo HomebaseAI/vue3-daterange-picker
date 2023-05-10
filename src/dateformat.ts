@@ -85,7 +85,7 @@ export function kindOf(val: any) {
     .slice(8, -1).toLowerCase();
 }
 
-type DateValue = string | number | Date | undefined | null;
+export type DateValue = string | number | Date | undefined;
 
 export const dateFormat = (masks: Mask = DEFAULT_MASKS, i18n = DEFAULT_i18n) => {
   const token = /d{1,4}|m{1,4}|yy(?:yy)?|([HhMsTt])\1?|[LloSZWN]|"[^"]*"|'[^']*'/g;

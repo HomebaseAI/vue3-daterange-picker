@@ -43,7 +43,7 @@
           </slot>
 
           <div class="calendars-container" v-if="showCalendars">
-            <div class="drp-calendar col left" :class="{ single: singleDatePicker }">
+            <div class="drp-calendar col left" :class="{ single: datePickerType }">
               <div class="daterangepicker_input d-none d-sm-block" v-if="false">
                 <input class="input-mini form-control" type="text" name="daterangepicker_start" :value="startText" />
                 <i class="fa fa-calendar glyphicon glyphicon-calendar"></i>
@@ -61,7 +61,7 @@
                 :current-time="start" :readonly="readonly" />
             </div>
 
-            <div class="drp-calendar col right" v-if="!singleDatePicker">
+            <div class="drp-calendar col right" v-if="!datePickerType">
               <div class="daterangepicker_input" v-if="false">
                 <input class="input-mini form-control" type="text" name="daterangepicker_end" :value="endText" />
                 <i class="fa fa-calendar glyphicon glyphicon-calendar"></i>
@@ -129,12 +129,18 @@ export type Pos = {
 }
 
 export type DateRange = {
-  startDate: Date | null,
-  endDate: Date | null,
+  startDate: Date | undefined,
+  endDate: Date | undefined,
 }
 
 export type Classes = { [key: string]: any };
-export type Ranges = { Today: Date[]; Yesterday: Date[]; 'This month': Date[]; 'This year': Date[]; 'Last month': Date[] };
+export type Ranges = {
+  Today: Date[];
+  Yesterday: Date[];
+  'This month': Date[];
+  'This year': Date[];
+  'Last month': Date[]
+} & { [key: string]: Date[] };
 export type DatePickerValue = {
   month: number;
   year: number;
@@ -143,6 +149,16 @@ export type DatePickerValue = {
 export type TogglePickerFn = (value: boolean | null, event?: boolean) => void;
 export type DateFormatFn = (classes: Classes, date: Date) => Classes;
 export type CalculatePosFn = (dropdownList: HTMLUListElement, component: any, pos: Pos) => void;
+/**
+ * Single - one calendar
+ * Range - one calendar with ranges
+ * Double - two calendars with ranges
+ */
+export enum RangePickerType {
+  Single = 0,
+  Range = 1,
+  Double = 2,
+}
 
 const DateRangePicker = defineComponent({
   inheritAttrs: false,
@@ -154,7 +170,7 @@ const DateRangePicker = defineComponent({
     event: 'update',
   },
   emits: {
-    'update': (val: DateRange) => true,
+    'update:value': (val: DateRange) => true,
     'change-month': (val: Date, i: number) => true,
     'toggle': (open: boolean, togglePicker: TogglePickerFn) => true,
     'finishSelection': (val: Date) => true,
@@ -164,22 +180,14 @@ const DateRangePicker = defineComponent({
     'update:modelValue': (val: DateRange) => true,
   },
   props: {
-    /**
-     * minimum date allowed to be selected
-     * @default null
-     */
     minDate: {
-      type: [Date],
+      type: Date,
       default() {
         return new Date('1900-01-01');
       }
     },
-    /**
-     * maximum date allowed to be selected
-     * @default null
-     */
     maxDate: {
-      type: [Date],
+      type: Date,
       default() {
         return new Date('2100-01-01');
       }
@@ -201,13 +209,10 @@ const DateRangePicker = defineComponent({
     /**
      * Only show a single calendar, with or without ranges.
      *
-     * Set true or 'single' for a single calendar with no ranges, single dates only.
-     * Set 'range' for a single calendar WITH ranges.
-     * Set false for a double calendar with ranges.
      */
-    singleDatePicker: {
-      type: [Boolean, String],
-      default: false,
+    datePickerType: {
+      type: Number as PropType<RangePickerType>,
+      default: RangePickerType.Double,
     },
     /**
      * Show the dropdowns for month and year selection above the calendars
@@ -265,21 +270,18 @@ const DateRangePicker = defineComponent({
     /**
      * This is the v-model prop which the component uses. This should be an object containing startDate and endDate props.
      * Each of the props should be a string which can be parsed by Date, or preferably a Date Object.
-     * @default {
-     * startDate: null,
-     * endDate: null
-     * }
      */
     modelValue: {
       type: Object as PropType<DateRange>,
       default: () => ({}),
     },
+
     /**
      * You can set this to false in order to hide the ranges selection. Otherwise it is an object with key/value. See below
      * @default *see below
      */
     ranges: {
-      type: [Object, Boolean] as PropType<Ranges | boolean>,
+      type: [Object, Boolean] as PropType<Ranges | false>,
       default(): Ranges {
         const today = new Date()
         today.setHours(0, 0, 0, 0)
@@ -316,7 +318,7 @@ const DateRangePicker = defineComponent({
      * which way the picker opens - "center", "left", "right" or "inline"
      */
     opens: {
-      type: String,
+      type: String as PropType<'center' | 'left' | 'right' | 'inline'>,
       default: 'center'
     },
 
@@ -347,7 +349,7 @@ const DateRangePicker = defineComponent({
      * Class of html picker control container
      */
     controlContainerClass: {
-      type: [String],
+      type: String,
       default: 'form-control reportrange-text'
     },
 
@@ -414,20 +416,20 @@ const DateRangePicker = defineComponent({
     //copy locale data object
     const locale = ctx.$dateUtil.localeData({ ...this.localeData });
 
-    const startDate = ctx.modelValue?.startDate || null;
-    const endDate = ctx.modelValue?.endDate || null;
+    const startDate = ctx.modelValue?.startDate;
+    const endDate = ctx.modelValue?.endDate;
 
     const monthDate = startDate ? new Date(startDate) : new Date()
     //get next month date
     const nextMonthDate = this.$dateUtil.nextMonth(monthDate)
 
-    const start = startDate ? new Date(startDate) : null
+    const start = startDate ? new Date(startDate) : undefined; 
     let end;
-    if (this.singleDatePicker && this.singleDatePicker !== 'range') {
+    if (this.datePickerType !== RangePickerType.Range) {
       // ignore endDate for singleDatePicker
       end = start
     } else {
-      end = endDate ? new Date(endDate) : null
+      end = endDate ? new Date(endDate) : undefined
     }
     const in_selection = false
     const open = false
@@ -463,7 +465,7 @@ const DateRangePicker = defineComponent({
     //calculate initial month selected in picker
     selectMonthDate() {
       let dt = this.end || new Date()
-      if (this.singleDatePicker !== false)
+      if (this.datePickerType !== RangePickerType.Double)
         this.changeLeftMonth({ year: dt.getFullYear(), month: dt.getMonth() + 1 })
       else
         this.changeRightMonth({ year: dt.getFullYear(), month: dt.getMonth() + 1 })
@@ -483,17 +485,13 @@ const DateRangePicker = defineComponent({
       return this.dateFormat ? this.dateFormat(classes, date) : classes
     },
     changeLeftMonth(value: DatePickerValue) {
-      // TODO(dylhack): remove this hack
-      const minDate = this.minDate as Date;
-      const maxDate = this.maxDate as Date;
-
       let newDate = new Date(value.year, value.month - 1, 1);
       this.monthDate = newDate
       if (this.linkedCalendars || (this.$dateUtil.yearMonth(this.monthDate) >= this.$dateUtil.yearMonth(this.nextMonthDate))) {
-        this.nextMonthDate = this.$dateUtil.validateDateRange(this.$dateUtil.nextMonth(newDate), minDate, maxDate);
+        this.nextMonthDate = this.$dateUtil.validateDateRange(this.$dateUtil.nextMonth(newDate), this.minDate, this.maxDate);
         // || this.singleDatePicker === 'range'
-        if ((!this.singleDatePicker) && this.$dateUtil.yearMonth(this.monthDate) === this.$dateUtil.yearMonth(this.nextMonthDate)) {
-          this.monthDate = this.$dateUtil.validateDateRange(this.$dateUtil.prevMonth(this.monthDate), minDate, maxDate)
+        if ((!this.datePickerType) && this.$dateUtil.yearMonth(this.monthDate) === this.$dateUtil.yearMonth(this.nextMonthDate)) {
+          this.monthDate = this.$dateUtil.validateDateRange(this.$dateUtil.prevMonth(this.monthDate), this.minDate, this.maxDate)
         }
       }
       /**
@@ -505,16 +503,12 @@ const DateRangePicker = defineComponent({
       this.$emit('change-month', this.monthDate, 0)
     },
     changeRightMonth(value: DatePickerValue) {
-      // TODO(dylhack): remove this hack
-      const minDate = this.minDate as Date;
-      const maxDate = this.maxDate as Date;
-
       let newDate = new Date(value.year, value.month - 1, 1);
       this.nextMonthDate = newDate
       if (this.linkedCalendars || (this.$dateUtil.yearMonth(this.nextMonthDate) <= this.$dateUtil.yearMonth(this.monthDate))) {
-        this.monthDate = this.$dateUtil.validateDateRange(this.$dateUtil.prevMonth(newDate), minDate, maxDate);
+        this.monthDate = this.$dateUtil.validateDateRange(this.$dateUtil.prevMonth(newDate), this.minDate, this.maxDate);
         if (this.$dateUtil.yearMonth(this.monthDate) === this.$dateUtil.yearMonth(this.nextMonthDate)) {
-          this.nextMonthDate = this.$dateUtil.validateDateRange(this.$dateUtil.nextMonth(this.nextMonthDate), minDate, maxDate)
+          this.nextMonthDate = this.$dateUtil.validateDateRange(this.$dateUtil.nextMonth(this.nextMonthDate), this.minDate, this.maxDate)
         }
       }
       //check for same month fix
@@ -524,7 +518,7 @@ const DateRangePicker = defineComponent({
 
       this.$emit('change-month', this.nextMonthDate, 1)
     },
-    normalizeDatetime(value: Date, oldValue: Date) {
+    normalizeDatetime(value: Date, oldValue?: Date) {
       let newDate = new Date(value);
       if (this.timePicker && oldValue) {
         newDate.setHours(oldValue.getHours());
@@ -538,9 +532,6 @@ const DateRangePicker = defineComponent({
     dateClick(value: Date) {
       if (this.readonly)
         return false
-      // TODO(dylhack): get rid of this hack
-      const start = this.start as Date;
-      const end = this.end as Date;
       this.onSelect();
       if (this.in_selection) {
         this.in_selection = false
@@ -554,9 +545,9 @@ const DateRangePicker = defineComponent({
         if (this.autoApply)
           this.clickedApply();
       } else {
-        this.start = this.normalizeDatetime(value, start);
-        this.end = this.normalizeDatetime(value, end);
-        if (!this.singleDatePicker || this.singleDatePicker === 'range') {
+        this.start = this.normalizeDatetime(value, this.start);
+        this.end = this.normalizeDatetime(value, this.end);
+        if (this.datePickerType === RangePickerType.Range) {
           this.in_selection = Boolean(this.end);
           this.$emit('startSelection', this.start)
         } else {
@@ -568,11 +559,8 @@ const DateRangePicker = defineComponent({
     hoverDate(value: Date) {
       if (this.readonly)
         return false
-      // TODO(dylhack): get rid of this hack
-      const end = this.end as Date;
-      const start = this.start as Date;
-      const dt_end = this.normalizeDatetime(value, end);
-      const dt_start = this.normalizeDatetime(value, start);
+      const dt_end = this.normalizeDatetime(value, this.end);
+      const dt_start = this.normalizeDatetime(value, this.start);
       if (this.in_selection) {
         this.start = new Date(Math.min(Number(this.in_selection), dt_end.valueOf(), dt_start.valueOf()))
         this.end = new Date(Math.max(Number(this.in_selection), dt_end.valueOf(), dt_start.valueOf()))
@@ -606,21 +594,21 @@ const DateRangePicker = defineComponent({
     },
     clickedApply() {
       this.togglePicker(false, true);
-      this.$emit('update', {
+      this.value = {
         startDate: this.start,
-        endDate: this.singleDatePicker && this.singleDatePicker !== 'range' ? this.start : this.end
-      })
+        endDate: this.datePickerType !== RangePickerType.Range ? this.start : this.end
+      }
     },
     clickCancel() {
       if (this.open) {
         // reset start and end
-        let startDate = this.dateRange.startDate
-        let endDate = this.dateRange.endDate
-        this.start = startDate ? new Date(startDate) : null
-        this.end = endDate ? new Date(endDate) : null
+        let startDate = this.value.startDate
+        let endDate = this.value.endDate
+        this.start = startDate ? new Date(startDate) : undefined;
+        this.end = endDate ? new Date(endDate) : undefined;
         // this.open = false
         this.in_selection = false;
-        this.togglePicker(false, true)
+        this.togglePicker(false, true);
       }
     },
     onSelect() {
@@ -636,30 +624,25 @@ const DateRangePicker = defineComponent({
       }
     },
     clickRange(value: Date[]) {
-      // TODO(dylhack): remove this hack
-      const minDate = this.minDate ?? new Date();
-      const maxDate = this.maxDate ?? new Date();
-      const startDate = this.start ?? new Date();
-      const endDate = this.end ?? new Date();
       this.in_selection = false;
 
       if (this.$dateUtil.isValidDate(value[0]) && this.$dateUtil.isValidDate(value[1])) {
-        this.start = this.$dateUtil.validateDateRange(new Date(value[0]), minDate, maxDate)
-        this.end = this.$dateUtil.validateDateRange(new Date(value[1]), minDate, maxDate)
+        this.start = this.$dateUtil.validateDateRange(new Date(value[0]), this.minDate, this.maxDate)
+        this.end = this.$dateUtil.validateDateRange(new Date(value[1]), this.minDate, this.maxDate)
         this.changeLeftMonth({
-          month: startDate.getMonth() + 1,
-          year: startDate.getFullYear()
+          month: this.value.startDate!.getMonth() + 1,
+          year: this.value.startDate!.getFullYear()
         })
 
         if (this.linkedCalendars === false) {
           this.changeRightMonth({
-            month: endDate.getMonth() + 1,
-            year: endDate.getFullYear()
+            month: this.value.endDate!.getMonth() + 1,
+            year: this.value.endDate!.getFullYear()
           })
         }
       } else {
-        this.start = null
-        this.end = null
+        this.start = undefined; 
+        this.end = undefined; 
       }
 
       this.onSelect();
@@ -668,40 +651,32 @@ const DateRangePicker = defineComponent({
         this.clickedApply()
     },
     onUpdateStartTime(value: TimePickerValue) {
-      // TODO(dylhack): get rid of this hack
-      const startDate = this.start as Date;
-      const minDate = this.minDate as Date;
-      const maxDate = this.maxDate as Date;
-      let start = new Date(startDate);
+      let start = new Date(this.start ?? 0);
       start.setHours(value.hours);
       start.setMinutes(value.minutes);
       start.setSeconds(value.seconds);
 
-      this.start = this.$dateUtil.validateDateRange(start, minDate, maxDate);
+      this.start = this.$dateUtil.validateDateRange(start, this.minDate, this.maxDate);
 
       // if autoapply is ON we should update the value on time selection change
       if (this.autoApply) {
-        this.$emit('update', {
+        this.value = {
           startDate: this.start,
-          endDate: this.singleDatePicker && this.singleDatePicker !== 'range' ? this.start : this.end
-        })
+          endDate: this.datePickerType !== RangePickerType.Range ? this.start : this.end
+        }
       }
     },
     onUpdateEndTime(value: TimePickerValue) {
-      // TODO(dylhack): get rid of this hack
-      const minDate = this.minDate as Date;
-      const maxDate = this.maxDate as Date;
-      const endDate = this.end as Date;
-      const end = new Date(endDate);
+      const end = new Date(this.end ?? 0);
       end.setHours(value.hours);
       end.setMinutes(value.minutes);
       end.setSeconds(value.seconds);
 
-      this.end = this.$dateUtil.validateDateRange(end, minDate, maxDate);
+      this.end = this.$dateUtil.validateDateRange(end, this.minDate, this.maxDate);
 
       // if autoapply is ON we should update the value on time selection change
       if (this.autoApply) {
-        this.$emit('update', { startDate: this.start, endDate: this.end })
+        this.value = { startDate: this.start, endDate: this.end };
       }
     },
     handleEscape(e: KeyboardEvent) {
@@ -711,7 +686,7 @@ const DateRangePicker = defineComponent({
     }
   },
   computed: {
-    dateRange: {
+    value: {
       get() {
         return this.modelValue;
       },
@@ -726,50 +701,47 @@ const DateRangePicker = defineComponent({
       return this.alwaysShowCalendars || this.showCustomRangeCalendars
     },
     startText() {
-      if (this.start === null)
+      if (!this.start)
         return ''
       return this.$dateUtil.format(this.start, this.locale.format)
     },
     endText() {
-      if (this.end === null)
+      if (!this.end)
         return ''
       return this.$dateUtil.format(this.end, this.locale.format)
     },
     rangeText() {
       let range = this.startText;
-      if (!this.singleDatePicker || this.singleDatePicker === 'range') {
+      if (this.datePickerType === RangePickerType.Range) {
         range += this.locale.separator + this.endText;
       }
       return range;
     },
     min() {
-      return this.minDate ? new Date(this.minDate) : null
+      return this.minDate; 
     },
     max() {
-      return this.maxDate ? new Date(this.maxDate) : null
+      return this.maxDate; 
     },
     pickerStyles() {
       return {
         'show-calendar': this.open || this.opens === 'inline',
         'show-ranges': this.showRanges,
         'show-weeknumbers': this.showWeekNumbers,
-        single: this.singleDatePicker,
+        single: this.datePickerType,
         ['opens' + this.opens]: true,
         linked: this.linkedCalendars,
         'hide-calendars': !this.showCalendars
       }
     },
     isClear() {
-      return !this.dateRange.startDate || !this.dateRange.endDate
+      return !this.value.startDate || !this.value.endDate
     },
     isDirty() {
-      // TODO(dylhack): get rid of this hack
-      const start = this.start as Date;
-      const end = this.end as Date;
-      const origStart = new Date(this.dateRange.startDate ?? 0);
-      const origEnd = new Date(this.dateRange.endDate ?? 0);
+      const origStart = new Date(this.value.startDate ?? 0);
+      const origEnd = new Date(this.value.endDate ?? 0);
 
-      return !this.isClear && (start.getTime() !== origStart.getTime() || end.getTime() !== origEnd.getTime())
+      return !this.isClear && (this.start?.getTime() !== origStart.getTime() || this.end?.getTime() !== origEnd.getTime())
     }
   },
   watch: {
@@ -790,33 +762,30 @@ const DateRangePicker = defineComponent({
       if (!this.$dateUtil.isValidDate(new Date(value)))
         return
 
-      this.start = (!!value && !this.isClear && this.$dateUtil.isValidDate(new Date(value))) ? new Date(value) : null
+      this.start = (!!value && !this.isClear && this.$dateUtil.isValidDate(new Date(value))) ? new Date(value) : undefined
       if (this.isClear) {
-        this.start = null
-        this.end = null
+        this.start = undefined;
+        this.end = undefined;
       } else {
-        this.start = new Date(this.dateRange.startDate ?? 0)
-        this.end = new Date(this.dateRange.endDate ?? 0)
+        this.start = new Date(this.value.startDate ?? 0)
+        this.end = new Date(this.value.endDate ?? 0)
       }
     },
     'dateRange.endDate'(value) {
       if (!this.$dateUtil.isValidDate(new Date(value)))
         return
 
-      this.end = (!!value && !this.isClear) ? new Date(value) : null
+      this.end = (!!value && !this.isClear) ? new Date(value) : undefined;
       if (this.isClear) {
-        this.start = null;
-        this.end = null;
+        this.start = undefined;
+        this.end = undefined;
       } else {
-        this.start = new Date(this.dateRange.startDate ?? 0);
-        this.end = new Date(this.dateRange.endDate ?? 0);
+        this.start = new Date(this.value.startDate ?? 0);
+        this.end = new Date(this.value.endDate ?? 0);
       }
     },
     open: {
       handler(value) {
-        // TODO(dylhack): get rid of this hack
-        const start = this.start as Date;
-        const end = this.end as Date;
         if (document) {
           this.selectMonthDate() //select initial visible months
 
@@ -825,9 +794,14 @@ const DateRangePicker = defineComponent({
             value ? document.addEventListener('keydown', this.handleEscape) : document.removeEventListener('keydown', this.handleEscape)
 
             if (!this.alwaysShowCalendars && this.ranges) {
-              this.showCustomRangeCalendars = !Object.keys(this.ranges)
-                // @ts-ignore
-                .find(key => this.$dateUtil.isSame(start, this.ranges[key][0], 'date') && this.$dateUtil.isSame(end, this.ranges[key][1], 'date'))
+              const ranges = this.ranges as Ranges;
+              this.showCustomRangeCalendars = !Object.keys(ranges)
+                .find(key => {
+                  const range = ranges[key];
+                  const rangeOne = range[0];
+                  const rangeTwo = range[1];
+                  this.$dateUtil.isSame(this.start, rangeOne, 'date') && this.$dateUtil.isSame(this.end, rangeTwo, 'date')
+                })
             }
           })
         }
@@ -839,6 +813,10 @@ const DateRangePicker = defineComponent({
 
 export type DateRangePickerType = InstanceType<typeof DateRangePicker>;
 
+export * from './dateformat';
+export { default as CalendarTime } from './components/CalendarTime.vue';
+export { default as CalendarRanges } from './components/CalendarRanges.vue';
+export type { DateUtil, LocaleOptions } from './dateUtil';
 export default DateRangePicker;
 </script>
 

@@ -49,10 +49,10 @@
 </template>
 
 <script lang="ts">
-import { PropType } from 'vue';
-import { LocaleOptions } from '../dateUtil.js';
+import type { PropType } from 'vue';
+import type { LocaleOptions } from '../dateUtil.js';
+import type { Classes } from '../DateRangePicker.vue';
 import DateUtilMixin from './DateUtilMixin.vue';
-import { Classes } from '@/DateRangePicker.vue';
 
 
 type Calendar = Array<Array<Date>>;
@@ -63,10 +63,10 @@ export default {
   props: {
     monthDate: { type: Date, required: true },
     localeData: { type: Object as PropType<LocaleOptions>, required: true },
-    start: { type: Date, required: true },
-    end: { type: Date, required: true },
-    minDate: { type: Date, required: true },
-    maxDate: { type: Date, required: true },
+    start: Date,
+    end: Date,
+    minDate: Date,
+    maxDate: Date,
     showDropdowns: {
       type: Boolean,
       default: false,
@@ -108,9 +108,9 @@ export default {
     dayClass(date: Date) {
       const dt = new Date(date)
       dt.setHours(0, 0, 0, 0)
-      const start = new Date(this.start)
+      const start = new Date(this.start ?? 0); 
+      const end = new Date(this.end ?? 0);
       start.setHours(0, 0, 0, 0)
-      const end = new Date(this.end)
       end.setHours(0, 0, 0, 0)
 
       const dt_min_compare = new Date(dt);
@@ -120,15 +120,15 @@ export default {
         off: date.getMonth() + 1 !== this.month,
         weekend: date.getDay() === 6 || date.getDay() === 0,
         today: dt.setHours(0, 0, 0, 0) == new Date().setHours(0, 0, 0, 0),
-        active: dt.setHours(0, 0, 0, 0) == new Date(this.start).setHours(0, 0, 0, 0) || dt.setHours(0, 0, 0, 0) == new Date(this.end).setHours(0, 0, 0, 0),
+        active: dt.setHours(0, 0, 0, 0) == new Date(this.start ?? 0).setHours(0, 0, 0, 0) || dt.setHours(0, 0, 0, 0) == new Date(this.end ?? 0).setHours(0, 0, 0, 0),
         'in-range': dt >= start && dt <= end,
         'start-date': dt.getTime() === start.getTime(),
         'end-date': dt.getTime() === end.getTime(),
         disabled: (this.minDate && dt_min_compare.getTime() < this.minDate.getTime())
           || (this.maxDate && dt.getTime() > this.maxDate.getTime()),
       }
-      return this.dateFormat ? this.dateFormat(classes, date) : classes
 
+      return this.dateFormat ? this.dateFormat(classes, date) : classes
     },
     checkYear () {
       if (this.$refs.yearSelect !== document.activeElement) {

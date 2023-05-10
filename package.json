@@ -30,7 +30,7 @@
   "module": "./build/index.mjs",
   "unpkg": "./build/index.umd.js",
   "jsdelivr": "./build/index.umd.js",
-  "typings": "./typings/plugin.d.ts",
+  "typings": "./typings/DateRangePicker.vue.d.ts",
   "scripts": {
     "build": "vite build && vue-tsc --emitDeclarationOnly",
     "lint": "eslint .",
