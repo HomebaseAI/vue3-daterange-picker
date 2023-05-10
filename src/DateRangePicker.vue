@@ -117,8 +117,8 @@ import Calendar from './components/Calendar.vue';
 import CalendarTime from './components/CalendarTime.vue';
 import CalendarRanges from './components/CalendarRanges.vue';
 import appendToBody from './directives/AppendToBody.vue';
-import { TimePickerValue } from './components/CalendarTime.vue'
-import { PropType, defineComponent } from 'vue'
+import type { TimePickerValue } from './components/CalendarTime.vue'
+import { type PropType, defineComponent } from 'vue'
 import type { LocaleOptions } from './dateUtil.js';
 
 export type Pos = {
