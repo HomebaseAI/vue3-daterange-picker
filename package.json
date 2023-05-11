@@ -1,6 +1,6 @@
 {
   "name": "@homebaseai/vue3-daterange-picker",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "VueJS 3 date picker",
   "author": "HomebaseAI <https://github.com/homebaseai>",
   "license": "GPL-3.0",
@@ -24,13 +24,14 @@
     "umd": "./build/index.umd.js",
     "named": "./build/index.mjs",
     "require": "./build/index.cjs.js",
-    "style": "./build/style.css"
+    "style": "./build/style.css",
+    "types": "./typings/plugin.d.ts"
   },
   "main": "./build/index.mjs",
   "module": "./build/index.mjs",
   "unpkg": "./build/index.umd.js",
   "jsdelivr": "./build/index.umd.js",
-  "typings": "./typings/DateRangePicker.vue.d.ts",
+  "typings": "./typings/plugin.d.ts",
   "scripts": {
     "build": "vite build && vue-tsc --emitDeclarationOnly",
     "lint": "eslint .",

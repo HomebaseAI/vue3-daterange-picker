@@ -55,7 +55,7 @@ import type { Classes } from '../DateRangePicker.vue';
 import DateUtilMixin from './DateUtilMixin.vue';
 
 
-type Calendar = Array<Array<Date>>;
+type ICalendar = Array<Array<Date>>;
 
 export default {
   name: 'calendar',
@@ -108,8 +108,8 @@ export default {
     dayClass(date: Date) {
       const dt = new Date(date)
       dt.setHours(0, 0, 0, 0)
-      const start = new Date(this.start ?? 0); 
-      const end = new Date(this.end ?? 0);
+      const start = new Date(this.startDate ?? 0); 
+      const end = new Date(this.endDate ?? 0);
       start.setHours(0, 0, 0, 0)
       end.setHours(0, 0, 0, 0)
 
@@ -120,7 +120,7 @@ export default {
         off: date.getMonth() + 1 !== this.month,
         weekend: date.getDay() === 6 || date.getDay() === 0,
         today: dt.setHours(0, 0, 0, 0) == new Date().setHours(0, 0, 0, 0),
-        active: dt.setHours(0, 0, 0, 0) == new Date(this.start ?? 0).setHours(0, 0, 0, 0) || dt.setHours(0, 0, 0, 0) == new Date(this.end ?? 0).setHours(0, 0, 0, 0),
+        active: dt.setHours(0, 0, 0, 0) == new Date(this.startDate ?? 0).setHours(0, 0, 0, 0) || dt.setHours(0, 0, 0, 0) == new Date(this.endDate ?? 0).setHours(0, 0, 0, 0),
         'in-range': dt >= start && dt <= end,
         'start-date': dt.getTime() === start.getTime(),
         'end-date': dt.getTime() === end.getTime(),
@@ -138,7 +138,30 @@ export default {
       }
     }
   },
+  emits: {
+    'update:start': (date: Date) => true,
+    'update:end': (date: Date) => true,
+    'change-month': (date: { month: number, year: number }) => true,
+    'dateClick': (date: Date) => true,
+    'hoverDate': (date: Date) => true,
+  },
   computed: {
+    startDate: {
+      get() {
+        return this.start
+      },
+      set(value: Date) {
+        this.$emit('update:start', value);
+      },
+    },
+    endDate: {
+      get() {
+        return this.end
+      },
+      set(value: Date) {
+        this.$emit('update:end', value);
+      },
+    },
     monthName () {
       return this.locale.monthNames[this.currentMonthDate.getMonth()]
     },
@@ -170,7 +193,7 @@ export default {
         });
       }
     },
-    calendar(): Calendar {
+    calendar(): ICalendar {
       const month = this.month
       const year = this.currentMonthDate.getFullYear()
       const firstDay = new Date(year, month - 1, 1)
@@ -178,7 +201,7 @@ export default {
       const lastYear = this.$dateUtil.prevMonth(firstDay).getFullYear()
       const daysInLastMonth = new Date(lastYear, month - 1, 0).getDate()
       const dayOfWeek = firstDay.getDay()
-      const calendar: Calendar = []
+      const calendar: ICalendar = []
 
       for (let i = 0; i < 6; i++) {
         calendar[i] = [];

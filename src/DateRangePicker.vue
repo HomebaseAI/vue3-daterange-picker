@@ -22,7 +22,7 @@
         <!--
           Optional header slot (same props as footer) @see footer slot for documentation
         -->
-        <slot name="header" :rangeText="rangeText" :locale="locale" :clickCancel="clickCancel" :clickApply="clickedApply"
+        <slot name="header" :rangeText="rangeText" :locale="locale" :clickCancel="clickCancel" :clickApply="clickApply"
           :in_selection="in_selection" :autoApply="autoApply">
         </slot>
 
@@ -49,7 +49,7 @@
                 <i class="fa fa-calendar glyphicon glyphicon-calendar"></i>
               </div>
               <div class="calendar-table">
-                <Calendar :monthDate="monthDate" :locale-data="locale" :start="start" :end="end" :minDate="min"
+                <Calendar :monthDate="monthDate" :locale-data="locale" v-model:start="start" v-model:end="end" :minDate="min"
                   :maxDate="max" :show-dropdowns="showDropdowns" @change-month="changeLeftMonth"
                   :date-format="dateFormatFn" @dateClick="dateClick" @hoverDate="hoverDate"
                   :showWeekNumbers="showWeekNumbers">
@@ -94,14 +94,14 @@
           @param {boolean} in_selection - is the picker in selection mode
           @param {boolean} autoApply - value of the autoApply prop (whether to select immediately)
         -->
-        <slot name="footer" :rangeText="rangeText" :locale="locale" :clickCancel="clickCancel" :clickApply="clickedApply"
+        <slot name="footer" :rangeText="rangeText" :locale="locale" :clickCancel="clickCancel" :clickApply="clickApply"
           :in_selection="in_selection" :autoApply="autoApply">
           <div class="drp-buttons" v-if="!autoApply">
             <span class="drp-selected" v-if="showCalendars">{{ rangeText }}</span>
             <button class="cancelBtn btn btn-sm btn-secondary" type="button" @click="clickCancel" v-if="!readonly">{{
               locale.cancelLabel }}
             </button>
-            <button class="applyBtn btn btn-sm btn-success" :disabled="in_selection" type="button" @click="clickedApply"
+            <button class="applyBtn btn btn-sm btn-success" :disabled="in_selection" type="button" @click="clickApply"
               v-if="!readonly">{{ locale.applyLabel }}
             </button>
           </div>
@@ -121,7 +121,7 @@ import type { TimePickerValue } from './components/CalendarTime.vue'
 import { type PropType, defineComponent } from 'vue'
 import type { LocaleOptions } from './dateUtil.js';
 
-export type Pos = {
+type Pos = {
   top: number,
   width: number,
   left: number,
@@ -416,8 +416,8 @@ const DateRangePicker = defineComponent({
     //copy locale data object
     const locale = ctx.$dateUtil.localeData({ ...this.localeData });
 
-    const startDate = ctx.modelValue?.startDate;
-    const endDate = ctx.modelValue?.endDate;
+    const startDate = ctx.modelValue.startDate;
+    const endDate = ctx.modelValue.endDate;
 
     const monthDate = startDate ? new Date(startDate) : new Date()
     //get next month date
@@ -454,8 +454,8 @@ const DateRangePicker = defineComponent({
       locale,
       monthDate,
       nextMonthDate,
-      start,
-      end,
+      start: start ?? undefined,
+      end: end ?? undefined,
       in_selection,
       open,
       showCustomRangeCalendars,
@@ -471,8 +471,8 @@ const DateRangePicker = defineComponent({
         this.changeRightMonth({ year: dt.getFullYear(), month: dt.getMonth() + 1 })
     },
     dateFormatFn(classes: Classes, date: Date) {
-      const startDate = this.start as Date;
-      const endDate = this.end as Date;
+      const startDate = this.start ?? new Date();
+      const endDate = this.end ?? new Date();
       const dt = new Date(date)
       dt.setHours(0, 0, 0, 0)
       const start = new Date(startDate)
@@ -530,9 +530,8 @@ const DateRangePicker = defineComponent({
       return newDate;
     },
     dateClick(value: Date) {
-      if (this.readonly)
-        return false
-      this.onSelect();
+      if (this.readonly) return false
+
       if (this.in_selection) {
         this.in_selection = false
         // this.end = this.normalizeDatetime(value, this.end);
@@ -543,7 +542,7 @@ const DateRangePicker = defineComponent({
          */
         this.$emit('finishSelection', value)
         if (this.autoApply)
-          this.clickedApply();
+          this.clickApply();
       } else {
         this.start = this.normalizeDatetime(value, this.start);
         this.end = this.normalizeDatetime(value, this.end);
@@ -552,9 +551,10 @@ const DateRangePicker = defineComponent({
           this.$emit('startSelection', this.start)
         } else {
           if (this.autoApply)
-            this.clickedApply();
+            this.clickApply();
         }
       }
+      this.onSelect();
     },
     hoverDate(value: Date) {
       if (this.readonly)
@@ -592,12 +592,12 @@ const DateRangePicker = defineComponent({
         this.$emit('toggle', this.open, this.togglePicker)
       }
     },
-    clickedApply() {
-      this.togglePicker(false, true);
+    clickApply() {
       this.value = {
         startDate: this.start,
         endDate: this.datePickerType !== RangePickerType.Range ? this.start : this.end
       }
+      this.togglePicker(false, true);
     },
     clickCancel() {
       if (this.open) {
@@ -648,7 +648,7 @@ const DateRangePicker = defineComponent({
       this.onSelect();
 
       if (this.autoApply)
-        this.clickedApply()
+        this.clickApply()
     },
     onUpdateStartTime(value: TimePickerValue) {
       let start = new Date(this.start ?? 0);
@@ -716,10 +716,10 @@ const DateRangePicker = defineComponent({
       return range;
     },
     min() {
-      return this.minDate ?? undefined; 
+      return this.minDate; 
     },
     max() {
-      return this.maxDate ?? undefined; 
+      return this.maxDate; 
     },
     pickerStyles() {
       return {
@@ -802,10 +802,6 @@ const DateRangePicker = defineComponent({
   }
 })
 
-export * from './dateformat';
-export { default as CalendarTime } from './components/CalendarTime.vue';
-export { default as CalendarRanges } from './components/CalendarRanges.vue';
-export type { DateUtil, LocaleOptions } from './dateUtil';
 export default DateRangePicker;
 </script>
 
