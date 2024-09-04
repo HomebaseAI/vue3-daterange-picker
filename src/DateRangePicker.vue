@@ -465,10 +465,15 @@ const DateRangePicker = defineComponent({
     //calculate initial month selected in picker
     selectMonthDate() {
       let dt = this.end || new Date()
-      if (this.datePickerType !== RangePickerType.Double)
-        this.changeLeftMonth({ year: dt.getFullYear(), month: dt.getMonth() + 1 })
-      else
-        this.changeRightMonth({ year: dt.getFullYear(), month: dt.getMonth() + 1 })
+      if (this.datePickerType !== RangePickerType.Double) {
+        //this gets subtracted by 1 in changeLeftMonth()
+        this.changeLeftMonth({ year: dt.getFullYear(), month: dt.getMonth() + 2 })
+      }
+      else {
+        //this gets subtracted by 1 in changeRightMonth()
+        this.changeRightMonth({ year: dt.getFullYear(), month: dt.getMonth() + 2 })
+      }
+
     },
     dateFormatFn(classes: Classes, date: Date) {
       const startDate = this.start ?? new Date();
